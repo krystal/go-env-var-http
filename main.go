@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -22,7 +23,19 @@ func main() {
 		}),
 	}
 
-	log.Printf("Listening on %s", lisAddr)
+	slowStart := os.Getenv("SLOW_START")
+	if slowStart != "" {
+		log.Printf("slow start configured: %s", slowStart)
+
+		duration, err := time.ParseDuration(slowStart)
+		if err != nil {
+			log.Fatalf("failed to parse SLOW_START: %s", err)
+		}
+
+		time.Sleep(duration)
+	}
+
+	log.Printf("listening on %s", lisAddr)
 	err := httpServ.ListenAndServe()
 	if err != nil {
 		log.Fatalf("listening failed: %s", err)
