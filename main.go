@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,7 @@ func main() {
 		Addr: lisAddr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
+			_, _ = w.Write([]byte(fmt.Sprintf("Path: %s\n\nEnvironment:\n", r.URL.String())))
 			_, _ = w.Write([]byte(strings.Join(os.Environ(), "\n")))
 		}),
 	}
