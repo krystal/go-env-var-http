@@ -1,3 +1,3 @@
-module github.com/strideynet/go-counter-server
+module github.com/krystal/go-env-var-http
 
-go 1.17
+go 1.19

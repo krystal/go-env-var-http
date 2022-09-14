@@ -1,0 +1,109 @@
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - env:
+      - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - "-s -w -X main.version={{ .Version }} -X main.commit={{ .Commit }}"
+    goos:
+      - "darwin"
+      - "freebsd"
+      - "linux"
+      - "windows"
+    goarch:
+      - "amd64"
+      - "386"
+      - "arm"
+      - "arm64"
+    goarm:
+      - "6"
+      - "7"
+
+archives:
+  - format: tar.gz
+    name_template: |-
+      {{ .ProjectName }}-{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}
+    wrap_in_directory: true
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+dockers:
+  - image_templates:
+      - "ghcr.io/krystal/go-env-var-http:{{ .Version }}-amd64"
+      - "ghcr.io/krystal/go-env-var-http:latest-amd64"
+    dockerfile: Dockerfile
+    use: buildx
+    goos: linux
+    goarch: amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - image_templates:
+      - "ghcr.io/krystal/go-env-var-http:{{ .Version }}-386"
+      - "ghcr.io/krystal/go-env-var-http:latest-386"
+    dockerfile: Dockerfile
+    use: buildx
+    goos: linux
+    goarch: "386"
+    build_flag_templates:
+      - "--platform=linux/386"
+  - image_templates:
+      - "ghcr.io/krystal/go-env-var-http:{{ .Version }}-arm64"
+      - "ghcr.io/krystal/go-env-var-http:latest-arm64"
+    use: buildx
+    goos: linux
+    goarch: arm64
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm64"
+  - image_templates:
+      - "ghcr.io/krystal/go-env-var-http:{{ .Version }}-armv6"
+      - "ghcr.io/krystal/go-env-var-http:latest-armv6"
+    use: buildx
+    goos: linux
+    goarch: arm
+    goarm: "6"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm/v6"
+  - image_templates:
+      - "ghcr.io/krystal/go-env-var-http:{{ .Version }}-armv7"
+      - "ghcr.io/krystal/go-env-var-http:latest-armv7"
+    use: buildx
+    goos: linux
+    goarch: arm
+    goarm: "7"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+
+docker_manifests:
+  - name_template: ghcr.io/krystal/go-env-var-http:{{ .Version }}
+    image_templates:
+      - ghcr.io/krystal/go-env-var-http:{{ .Version }}-amd64
+      - ghcr.io/krystal/go-env-var-http:{{ .Version }}-386
+      - ghcr.io/krystal/go-env-var-http:{{ .Version }}-arm64
+      - ghcr.io/krystal/go-env-var-http:{{ .Version }}-armv6
+      - ghcr.io/krystal/go-env-var-http:{{ .Version }}-armv7
+  - name_template: ghcr.io/krystal/go-env-var-http:latest
+    image_templates:
+      - ghcr.io/krystal/go-env-var-http:latest-amd64
+      - ghcr.io/krystal/go-env-var-http:latest-386
+      - ghcr.io/krystal/go-env-var-http:latest-arm64
+      - ghcr.io/krystal/go-env-var-http:latest-armv6
+      - ghcr.io/krystal/go-env-var-http:latest-armv7
